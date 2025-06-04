@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Heart Rate Monitor</title>
+    <link rel="stylesheet" href="/css/heart-rate/main.css">
+    <!-- amCharts 4 -->
+    <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/plugins/sunburst.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">Live Heart Rate Monitor</h1>
+                <div class="header-controls">
+                    <div class="connection-status" id="connectionStatus">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">Connecting...</span>
+                    </div>
+                    <button class="btn btn-secondary" id="clearDataBtn">Clear Data</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Statistics Grid -->
+            <section class="metrics-grid" id="statsContainer">
+                <div class="metric-card">
+                    <p class="metric-label">Minimum BPM</p>
+                    <h5 class="metric-value" id="minBpm">-</h5>
+                </div>
+                <div class="metric-card">
+                    <p class="metric-label">Maximum BPM</p>
+                    <h5 class="metric-value" id="maxBpm">-</h5>
+                </div>
+                <div class="metric-card">
+                    <p class="metric-label">Average BPM</p>
+                    <h5 class="metric-value" id="avgBpm">-</h5>
+                </div>
+                <div class="metric-card">
+                    <p class="metric-label">Total Readings</p>
+                    <h5 class="metric-value" id="totalReadings">0</h5>
+                </div>
+            </section>
+
+            <!-- Chart Container -->
+            <section class="chart-section">
+                <div class="chart-header">
+                    <h2>Real-time Heart Rate Chart</h2>
+                    <div class="chart-controls">
+                        <span class="chart-status" id="chartStatus">Loading...</span>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div id="chartDiv" class="chart"></div>
+                    <div class="chart-overlay" id="chartOverlay">
+                        <div class="chart-overlay-content">
+                            <div class="loading-spinner"></div>
+                            <p>Initializing chart...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Latest Reading -->
+            <section class="latest-reading" id="latestReading" style="display: none;">
+                <div class="reading-content">
+                    <div class="reading-info">
+                        <h3>Latest Reading</h3>
+                        <p class="reading-time" id="readingTime">-</p>
+                    </div>
+                    <div class="reading-value">
+                        <span class="bpm-value" id="latestBpm">-</span>
+                        <span class="bpm-unit">BPM</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Error Modal -->
+    <div class="modal" id="errorModal" style="display: none;">
+        <div class="modal-content">
+            <h3>Connection Error</h3>
+            <p id="errorMessage">Unable to connect to the heart rate monitor.</p>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="location.reload()">Retry</button>
+                <button class="btn btn-secondary" onclick="closeErrorModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/js/heart-rate/utils.js"></script>
+    <script src="/js/heart-rate/websocket-client.js"></script>
+    <script src="/js/heart-rate/chart-manager.js"></script>
+    <script src="/js/heart-rate/stats-manager.js"></script>
+    <script src="/js/heart-rate/main.js"></script>
+</body>
+</html>
