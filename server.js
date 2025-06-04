@@ -70,11 +70,12 @@ app.use(passport.session());
 
 app.get('/*', function(req, res, next) {
   //console.log("req.headers " + req.headers.host);
-  if (req.headers != null && req.headers.host != null && !req.headers.host.includes("www") && (req.headers.host.includes("jamjamprojects.com") || req.headers.host.includes("localhost") || req.headers.host.includes("18.168.254.31"))) {
+  /*if (req.headers != null && req.headers.host != null && !req.headers.host.includes("www") && (req.headers.host.includes("jamjamprojects.com") || req.headers.host.includes("localhost") || req.headers.host.includes("18.168.254.31"))) {
     next();  
   } else {
     res.redirect('https://' + req.headers.host.replace(/^www\./, '') + req.url);    
-  }
+  }*/
+  next(); 
 });
 
 websocketController.init(io);
