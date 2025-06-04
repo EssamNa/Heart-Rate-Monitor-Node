@@ -75,7 +75,7 @@ app.get('/*', function(req, res, next) {
   } else {
     res.redirect('https://' + req.headers.host.replace(/^www\./, '') + req.url);    
   }*/
-  next(); 
+  next();
 });
 
 websocketController.init(io);
