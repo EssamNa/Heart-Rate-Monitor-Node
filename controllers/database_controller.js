@@ -58,7 +58,7 @@ let getCollection = (db, name) => {
         var heartRateData = {heartRate: data.heartRate, timestamp: new Date(data.timestamp)};
         return new Promise((resolve, reject) => {
             // stop saving data to database
-            /*heartRateCollection.insertOne(heartRateData,
+            heartRateCollection.insertOne(heartRateData,
                 function (error, result) {
                     if (error) reject(error);
                     else resolve({
@@ -66,14 +66,14 @@ let getCollection = (db, name) => {
                         heartRate: data.heartRate,
                         timestamp: data.timestamp
                       });
-            });*/
-            resolve({heartRate: data.heartRate, timestamp: data.timestamp})
+            });
+            //resolve({heartRate: data.heartRate, timestamp: data.timestamp})
         });
   }
 
   async function  getHistoricalData(timeRange, limit = 1000) {
     return new Promise((resolve, reject) => {
-        /*heartRateCollection.find({
+        heartRateCollection.find({
           timestamp: {
             $gte: timeRange.start,
             $lte: timeRange.end
@@ -92,13 +92,13 @@ let getCollection = (db, name) => {
                   }));
                 resolve(returnedData);
             }
-        });*/
-        resolve([]);
+        });
+        //resolve([]);
     });
   }
 
-  /*async function getStats(timeRange) {
-    try {
+  async function getStats(timeRange) {
+    return new Promise((resolve, reject) => {
       const pipeline = [
         {
           $match: {
@@ -119,28 +119,67 @@ let getCollection = (db, name) => {
         }
       ];
 
-      const result = await collections.heartRateData.aggregate(pipeline).toArray();
-      
-      if (result.length === 0) {
-        return { min: 0, max: 0, average: 0, count: 0 };
-      }
+      heartRateCollection.aggregate(pipeline).toArray(function (error, result) {
+        if (error) {
+          console.error('❌ Error calculating stats:', error);
+          resolve({ min: 0, max: 0, average: 0, count: 0 });
+        } else {
+          if (result.length === 0) {
+            resolve({ min: 0, max: 0, average: 0, count: 0 });
+          } else {
+            const stats = result[0];
+            resolve({
+              min: stats.min || 0,
+              max: stats.max || 0,
+              average: Math.round(stats.average || 0),
+              count: stats.count || 0
+            });
+          }
+        }
+      });
+    });
+  }
 
-      const stats = result[0];
-      return {
-        min: stats.min || 0,
-        max: stats.max || 0,
-        average: Math.round(stats.average || 0),
-        count: stats.count || 0
-      };
-    } catch (error) {
-      console.error('❌ Error calculating stats:', error);
-      throw error;
-    }
-  }*/
+  // New function for time range presets
+  function getTimeRangePresets() {
+    const now = new Date();
+    return {
+      '5min': {
+        start: new Date(now.getTime() - 5 * 60 * 1000),
+        end: now,
+        label: 'Last 5 Minutes'
+      },
+      '15min': {
+        start: new Date(now.getTime() - 15 * 60 * 1000),
+        end: now,
+        label: 'Last 15 Minutes'
+      },
+      '1hour': {
+        start: new Date(now.getTime() - 60 * 60 * 1000),
+        end: now,
+        label: 'Last Hour'
+      },
+      '6hours': {
+        start: new Date(now.getTime() - 6 * 60 * 60 * 1000),
+        end: now,
+        label: 'Last 6 Hours'
+      },
+      '24hours': {
+        start: new Date(now.getTime() - 24 * 60 * 60 * 1000),
+        end: now,
+        label: 'Last 24 Hours'
+      },
+      '7days': {
+        start: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
+        end: now,
+        label: 'Last 7 Days'
+      }
+    };
+  }
 
 exports.saveHeartRateData = saveHeartRateData;
 exports.getHistoricalData = getHistoricalData;
-//exports.getStats = getStats;
+exports.getStats = getStats;
 
 
 

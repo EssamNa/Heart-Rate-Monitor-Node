@@ -49,6 +49,33 @@
                     <h5 class="metric-value" id="totalReadings">0</h5>
                 </div>
             </section>
+            <section id="timeRangeContainer" class="time-range-section">
+              <!-- Time Range Selector -->
+                <section class="time-range-section">
+                  <div class="time-range-card">
+                    <div class="time-range-header">
+                      <h3>📊 View Historical Data</h3>
+                      <div class="mode-indicator">
+                        <span id="currentModeText">Live View</span>
+                        <div class="mode-dot" id="modeDot"></div>
+                      </div>
+                    </div>
+                    
+                    <div class="time-range-buttons">
+                      <button class="time-btn" data-range="5min">Last 5 Minutes</button>
+                      <button class="time-btn" data-range="15min">Last 15 Minutes</button>
+                      <button class="time-btn" data-range="1hour">Last 1 Hour</button>
+                      <button class="time-btn" data-range="6hours">Last 6 Hours</button>
+                      <button class="time-btn" data-range="24hours">Last 24 Hours</button>
+                      <button class="time-btn live-btn" data-range="live">🔴 Live View</button>
+                    </div>
+                    
+                    <div class="time-range-info" id="timeRangeInfo" style="display: none;">
+                      <p>📈 Showing <span id="recordCount">0</span> readings from <span id="timeRangeText">-</span></p>
+                    </div>
+                  </div>
+                </section>
+            </section>
 
             <!-- Chart Container -->
             <section class="chart-section">
@@ -101,6 +128,7 @@
     <script src="/js/heart-rate/utils.js"></script>
     <script src="/js/heart-rate/websocket-client.js"></script>
     <script src="/js/heart-rate/chart-manager.js"></script>
+    <script src="/js/heart-rate/historical-data-manager.js"></script>
     <script src="/js/heart-rate/stats-manager.js"></script>
     <script src="/js/heart-rate/main.js"></script>
 </body>

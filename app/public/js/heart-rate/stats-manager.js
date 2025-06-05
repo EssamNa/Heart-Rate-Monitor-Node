@@ -21,6 +21,17 @@ class StatsManager {
     
     this.renderStats();
   }
+  updateStatsFromData(data) {
+    if (data == null) {
+      this.currentStats = { min: 0, max: 0, average: 0, count: 0 };
+      this.hideLatestReading();
+    } else {
+      this.currentStats = data;
+      this.updateLatestReading(data);
+    }
+    this.renderStats();
+
+  }
 
   renderStats() {
     if (this.minElement) {

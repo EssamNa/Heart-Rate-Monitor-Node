@@ -39,8 +39,8 @@ app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:500
 //app.use(require('stylus').middleware({ src: __dirname + '/app/public' }));
 app.use(express.static(__dirname + '/app/public'));
 
-// remove initialisation for the database for now
-//databaseController.init();
+// remove initialisation for the database to enable running on local machine
+databaseController.init();
 
 nconf.file('./config/app_config.json');
 

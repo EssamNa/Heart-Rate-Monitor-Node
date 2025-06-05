@@ -43,15 +43,15 @@ class WebSocketClient {
     });
 
     this.socket.on('heartRateData', (data) => {
-      console.log('Received heart rate data:', data);
+      //console.log('Received heart rate data:', data);
       this.addHeartRateData(data);
       this.triggerCallbacks('onData', data);
     });
 
     this.socket.on('recentData', (data) => {
       console.log('Received recent data:', data.length, 'points');
-      this.heartRateData = data.slice(-this.maxDataPoints);
-      this.triggerCallbacks('onData', null, this.heartRateData);
+      //this.heartRateData = data.slice(-this.maxDataPoints);
+      //this.triggerCallbacks('onData', null, this.heartRateData);
     });
   }
 

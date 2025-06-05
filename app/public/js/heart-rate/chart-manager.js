@@ -163,6 +163,90 @@ class ChartManager {
     });
   }
 
+  // Aggregate data by second, taking the average heart rate per second
+  aggregateDataBySecond(data) {
+    if (!data || data.length === 0) return [];
+
+    const aggregatedData = new Map();
+
+    data.forEach(item => {
+      const timestamp = new Date(item.timestamp);
+      // Round down to the nearest second
+      const secondKey = new Date(timestamp.getFullYear(), timestamp.getMonth(), 
+                                timestamp.getDate(), timestamp.getHours(), 
+                                timestamp.getMinutes(), timestamp.getSeconds()).getTime();
+
+      if (!aggregatedData.has(secondKey)) {
+        aggregatedData.set(secondKey, {
+          timestamp: new Date(secondKey),
+          heartRates: [],
+          sum: 0,
+          count: 0
+        });
+      }
+
+      const entry = aggregatedData.get(secondKey);
+      entry.heartRates.push(item.heartRate);
+      entry.sum += item.heartRate;
+      entry.count += 1;
+    });
+
+    // Convert to array and calculate averages
+    return Array.from(aggregatedData.values()).map(entry => ({
+      timestamp: entry.timestamp,
+      heartRate: Math.round(entry.sum / entry.count)
+    })).sort((a, b) => a.timestamp - b.timestamp);
+  }
+
+  // Determine appropriate aggregation interval based on time range
+  getAggregationInterval(timeinMins) {
+    if (timeinMins <= 15) {
+      return 1; // 1 second for short periods
+    } else if (timeinMins <= 60) {
+      return 5; // 5 seconds for 1 hour
+    } else if (timeinMins <= 360) {
+      return 30; // 30 seconds for 6 hours
+    } else if (timeinMins <= 1440) {
+      return 60; // 1 minute for 24 hours
+    } else {
+      return 300; // 5 minutes for 7 days or longer
+    }
+  }
+
+  // Aggregate data by custom interval
+  aggregateDataByInterval(data, intervalSeconds) {
+    if (!data || data.length === 0) return [];
+
+    const aggregatedData = new Map();
+    const intervalMs = intervalSeconds * 1000;
+
+    data.forEach(item => {
+      const timestamp = new Date(item.timestamp);
+      // Round down to the nearest interval
+      const intervalKey = Math.floor(timestamp.getTime() / intervalMs) * intervalMs;
+
+      if (!aggregatedData.has(intervalKey)) {
+        aggregatedData.set(intervalKey, {
+          timestamp: new Date(intervalKey),
+          heartRates: [],
+          sum: 0,
+          count: 0
+        });
+      }
+
+      const entry = aggregatedData.get(intervalKey);
+      entry.heartRates.push(item.heartRate);
+      entry.sum += item.heartRate;
+      entry.count += 1;
+    });
+
+    // Convert to array and calculate averages
+    return Array.from(aggregatedData.values()).map(entry => ({
+      timestamp: entry.timestamp,
+      heartRate: Math.round(entry.sum / entry.count)
+    })).sort((a, b) => a.timestamp - b.timestamp);
+  }
+
   updateData(data) {
     if (!this.isInitialized || !this.chart || !data) {
       return;
@@ -185,7 +269,6 @@ class ChartManager {
             const startIndex = Math.max(0, chartData.length - 20);
             const startDate = chartData[startIndex].timestamp;
             const endDate = chartData[chartData.length - 1].timestamp;
-            
             dateAxis.zoomToDates(startDate, endDate);
           }
         }
@@ -193,6 +276,76 @@ class ChartManager {
     } catch (error) {
       console.error('Chart update error:', error);
     }
+  }
+
+  updateHistoricalData(data, isHistorical = true, timeRange = null) {
+    if (!this.isInitialized || !data) {
+      console.log('Chart not initialized or no data provided');
+      return;
+    }
+
+    try {
+      console.log(`📊 Processing ${data.length} historical data points for range: ${timeRange}`);
+      
+      this.data = Array.isArray(data) ? data : [data];
+      
+      // Determine aggregation interval based on time range
+      const timeinMins = timeRange ? this.getTimeRangeInMinutes(timeRange) : 60;
+      const aggregationInterval = this.getAggregationInterval(timeinMins);
+      
+      console.log(`📊 Using ${aggregationInterval}s aggregation interval for ${timeinMins}min range`);
+      
+      // Aggregate data appropriately
+      let chartData;
+      if (aggregationInterval === 1) {
+        chartData = this.aggregateDataBySecond(this.data);
+      } else {
+        chartData = this.aggregateDataByInterval(this.data, aggregationInterval);
+      }
+
+      console.log(`📊 Aggregated to ${chartData.length} data points`);
+
+      if (this.chart.series.length > 0) {
+        // Clear existing data and set new data
+        const series = this.chart.series.getIndex(0);
+        series.data = chartData;
+
+        // Set appropriate zoom for historical data
+        if (chartData.length > 0) {
+          const dateAxis = this.chart.xAxes.getIndex(0);
+          if (dateAxis) {
+            const startDate = chartData[0].timestamp;
+            const endDate = chartData[chartData.length - 1].timestamp;
+            
+            console.log(`📊 Setting chart range from ${startDate.toISOString()} to ${endDate.toISOString()}`);
+            
+            // Use setTimeout to ensure the chart has processed the new data
+            setTimeout(() => {
+              dateAxis.zoomToDates(startDate, endDate, false, true);
+            }, 100);
+          }
+        }
+
+        // Force chart refresh
+        this.chart.invalidateData();
+      }
+
+    } catch (error) {
+      console.error('Historical chart update error:', error);
+    }
+  }
+
+  // Helper function to convert time range string to minutes
+  getTimeRangeInMinutes(timeRange) {
+    const timeRangeMap = {
+      '5min': 5,
+      '15min': 15,
+      '1hour': 60,
+      '6hours': 360,
+      '24hours': 1440,
+      '7days': 10080
+    };
+    return timeRangeMap[timeRange] || 60;
   }
 
   updateStatus(status) {

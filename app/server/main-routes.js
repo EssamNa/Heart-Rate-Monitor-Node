@@ -1,6 +1,6 @@
 const path = require('path');
 
-module.exports = function(app) {
+module.exports = function(app, passport) {
   // Main heart rate monitor page
   app.get('/', (req, res) => {
       res.sendFile(__dirname + '/views/heart-rate-monitor.html');
@@ -22,6 +22,8 @@ module.exports = function(app) {
     res.status(404);
     res.sendFile(__dirname + '/views/error.html');
   });
+
+  require('./api-routes.js')(app, passport);
 
   // 404 handler - must be last
   app.get('*', (req, res) => {
